@@ -1,0 +1,1 @@
+The only requirement is that the file name starts with the episode id from Kink.
