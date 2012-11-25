@@ -52,7 +52,8 @@ class KinkAgent(Agent.Movies):
 
     metadata.content_rating = 'XXX'
     metadata.studio = 'Kink.com'
-    # metadata.genres = None
+    metadata.genres = series
+    metadata.director = html.xpath('//div[@class="titleAndPerformers"]/meta[@itemprop="director"]/@content')[0].text_content().strip('\t\r\n ')
 
     # Release Date
     try:
