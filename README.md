@@ -1,1 +1,3 @@
-The only requirement is that the file name starts with the episode id from Kink.
+**Please beware, you might consider this NSFW.**
+
+In order for this to work, the filename has to begin with the episode ID. Subdirectories currently not supported.
