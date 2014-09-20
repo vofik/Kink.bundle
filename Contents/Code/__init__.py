@@ -22,7 +22,7 @@ class KinkAgent(Agent.Movies):
     if media.primary_metadata is not None:
       title = media.primary_metadata.title
 
-    episodeMatch = re.match(r'(\d{3,})', title)
+    episodeMatch = re.match(r'(?:[A-Za-z]{2,4}-)?(\d{3,})', title)
 
     # if file starts with episode id, just go directly to that episode
     if episodeMatch is not None:
