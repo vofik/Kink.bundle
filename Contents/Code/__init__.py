@@ -48,7 +48,7 @@ class KinkAgent(Agent.Movies):
 
     # set rating to XXX
     metadata.content_rating = 'XXX'
-    metadata.genres = series
+    metadata.genres.add(series)
     metadata.director = html.xpath('//div[@class="titleAndPerformers"]/meta[@itemprop="director"]/@content')[0].text_content().strip('\t\r\n ')
 
     #set episode ID as tagline for easy visibility
