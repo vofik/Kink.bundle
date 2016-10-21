@@ -34,19 +34,23 @@ class KinkAgent(Agent.Movies):
     html = HTML.ElementFromURL(EXC_MOVIE_INFO % metadata.id,
                                headers={'Cookie': 'viewing-preferences=straight%2Cgay'})
 
-    # set movie studio to kink site
-    series = html.xpath('//div[@class="shoot-info"]//a[contains(@href,":channel")]')[0].text_content().strip()
-    metadata.studio = series
+    # studio/tags
+    tags = html.xpath('//div[@class="shoot-info"]//a[starts-with(@href,"/tag/")]')
+    for tag in tags:
+      if tag.get('href').endswith(':channel'):
+        metadata.studio = tag.text_content().strip()
+      else:
+        metadata.tags.add(tag.text_content().strip())
+    metadata.genres.add(metadata.studio)
 
     # set movie title to shoot title
     metadata.title = html.xpath('//div[@class="shoot-info"]//h1')[0].text_content() + " (" + metadata.id + ")"
 
-    # set rating to XXX
+    # set content rating to XXX
     metadata.content_rating = 'XXX'
-    metadata.genres.add(series)
 
-    #set episode ID as tagline for easy visibility
-    metadata.tagline = series + " – " + metadata.id
+    # set episode ID as tagline for easy visibility
+    metadata.tagline = metadata.studio + " – " + metadata.id
 
     # set movie release date to shoot release date
     try:
@@ -54,7 +58,6 @@ class KinkAgent(Agent.Movies):
       metadata.originally_available_at = Datetime.ParseDate(release_date).date()
       metadata.year = metadata.originally_available_at.year
     except: pass
-
 
     # set poster to the image that kink.com chose as preview
     try:
@@ -90,4 +93,11 @@ class KinkAgent(Agent.Movies):
         role = metadata.roles.new()
         lename = member.text_content().strip()
         role.actor = lename
+    except: pass
+
+    # rating
+    try:
+      rating_dict = JSON.ObjectFromURL(url=EXC_BASEURL + 'api/ratings/%s' % metadata.id,
+                                       headers={'Cookie': 'viewing-preferences=straight%2Cgay'})
+      metadata.rating = float(rating_dict['avgRating']) * 2
     except: pass
