@@ -5,6 +5,7 @@ import re
 EXC_BASEURL = 'http://www.kink.com/'
 EXC_SEARCH_MOVIES = EXC_BASEURL + 'search?q=%s'
 EXC_MOVIE_INFO = EXC_BASEURL + 'shoot/%s'
+EXC_MODEL_INFO = EXC_BASEURL + 'model/%s'
 
 def Start():
   HTTP.CacheTime = CACHE_1DAY
@@ -34,14 +35,30 @@ class KinkAgent(Agent.Movies):
     html = HTML.ElementFromURL(EXC_MOVIE_INFO % metadata.id,
                                headers={'Cookie': 'viewing-preferences=straight%2Cgay'})
 
-    # studio/tags
+    # use site name as movie studio
+    # add site name to genres
+    metadata.genres.clear()
+    try:
+      sitename = html.xpath('//div[@class="shoot-page"]/@data-sitename')[0]
+      for link in html.xpath('//a[contains(@href,"%s")]/text()' % sitename):
+        if link.strip():
+          metadata.studio = link.strip()
+          metadata.genres.add(metadata.studio)
+          break
+    except:
+      pass
+
+    # add channels to genres
+    # add other tags to collections
+    metadata.collections.clear()
     tags = html.xpath('//div[@class="shoot-info"]//a[starts-with(@href,"/tag/")]')
     for tag in tags:
       if tag.get('href').endswith(':channel'):
-        metadata.studio = tag.text_content().strip()
+        if not metadata.studio:
+          metadata.studio = tag.text_content().strip()
+        metadata.genres.add(tag.text_content().strip())
       else:
-        metadata.tags.add(tag.text_content().strip())
-    metadata.genres.add(metadata.studio)
+        metadata.collections.add(tag.text_content().strip())
 
     # set movie title to shoot title
     metadata.title = html.xpath('//div[@class="shoot-info"]//h1')[0].text_content() + " (" + metadata.id + ")"
@@ -84,8 +101,24 @@ class KinkAgent(Agent.Movies):
           metadata.summary = metadata.summary + paragraph.text_content().strip().replace('<br>',"\n") + "\n"
         metadata.summary.strip()
     except: pass
+
+    # director
+    try:
+      metadata.directors.clear()
+      director_id = html.xpath('//div[@class="shoot-page"]/@data-director')[0]
+      director_html = HTML.ElementFromURL(EXC_MODEL_INFO % director_id,
+                                          headers={'Cookie': 'viewing-preferences=straight%2Cgay'})
+      director_name = director_html.xpath('//h1[@class="page-title"]')[0].text_content()
+      try:
+        director = metadata.directors.new()
+        director.name = director_name
+      except:
+        try:
+          metadata.directors.add(director_name)
+        except: pass
+    except: pass
     
-    # starring/director
+    # starring
     try:
       starring = html.xpath('//p[@class="starring"]/*[@class="names"]/a')
       metadata.roles.clear()
