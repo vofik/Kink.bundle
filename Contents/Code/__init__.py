@@ -92,7 +92,12 @@ class KinkAgent(Agent.Movies):
       for member in starring:
         role = metadata.roles.new()
         lename = member.text_content().strip()
-        role.name = lename
+        try:
+          role.name = lename
+        except:
+          try:
+            role.actor = lename
+          except: pass
     except: pass
 
     # rating
