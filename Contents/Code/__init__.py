@@ -71,7 +71,7 @@ class KinkAgent(Agent.Movies):
 
     # set movie release date to shoot release date
     try:
-      release_date = html.xpath('//div[@class="shoot-info"]//p[starts-with(.,"date:")]')[0].text_content().replace('date: ', '')
+      release_date = html.xpath('//div[@class="shoot-info"]//p[starts-with(normalize-space(.),"date:")]')[0].text_content().replace('date: ', '')
       metadata.originally_available_at = Datetime.ParseDate(release_date).date()
       metadata.year = metadata.originally_available_at.year
     except: pass
