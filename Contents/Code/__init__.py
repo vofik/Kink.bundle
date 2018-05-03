@@ -61,7 +61,7 @@ class KinkAgent(Agent.Movies):
         metadata.collections.add(tag.text_content().strip())
 
     # set movie title to shoot title
-    metadata.title = html.xpath('//div[@class="shoot-info"]//h1')[0].text_content() + " (" + metadata.id + ")"
+    metadata.title = html.xpath('//div[@class="shoot-info"]//h1/text()')[0] + " (" + metadata.id + ")"
 
     # set content rating to XXX
     metadata.content_rating = 'XXX'
