@@ -61,7 +61,7 @@ class KinkAgent(Agent.Movies):
         metadata.collections.add(tag.text_content().strip())
 
     # set movie title to shoot title
-    metadata.title = html.xpath('//div[@class="shoot-info"]//h1/text()')[0] + " (" + metadata.id + ")"
+    metadata.title = html.xpath('//div[@class="shoot-content"]//h1[@class="shoot-title"]/text()')[0] + " (" + metadata.id + ")"
 
     # set content rating to XXX
     metadata.content_rating = 'XXX'
@@ -71,7 +71,7 @@ class KinkAgent(Agent.Movies):
 
     # set movie release date to shoot release date
     try:
-      release_date = html.xpath('//div[@class="shoot-info"]//p[starts-with(normalize-space(.),"date:")]')[0].text_content().replace('date: ', '')
+      release_date = html.xpath('//div[@class="shoot-info"]//p[starts-with(normalize-space(.),"Date:")]')[0].text_content().replace('Date: ', '')
       metadata.originally_available_at = Datetime.ParseDate(release_date).date()
       metadata.year = metadata.originally_available_at.year
     except: pass
@@ -105,10 +105,7 @@ class KinkAgent(Agent.Movies):
     # director
     try:
       metadata.directors.clear()
-      director_id = html.xpath('//div[@class="shoot-page"]/@data-director')[0]
-      director_html = HTML.ElementFromURL(EXC_MODEL_INFO % director_id,
-                                          headers={'Cookie': 'viewing-preferences=straight%2Cgay'})
-      director_name = director_html.xpath('//h1[@class="page-title"]')[0].text_content()
+      director_name = html.xpath('//div[@class="shoot-info"]//p[@class="director"]/a/text()')[0]
       try:
         director = metadata.directors.new()
         director.name = director_name
@@ -137,5 +134,5 @@ class KinkAgent(Agent.Movies):
     try:
       rating_dict = JSON.ObjectFromURL(url=EXC_BASEURL + 'api/ratings/%s' % metadata.id,
                                        headers={'Cookie': 'viewing-preferences=straight%2Cgay'})
-      metadata.rating = float(rating_dict['avgRating']) * 2
+      metadata.rating = float(rating_dict['average']) * 2
     except: pass
